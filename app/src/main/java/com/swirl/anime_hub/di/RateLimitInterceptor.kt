@@ -4,6 +4,15 @@ import okhttp3.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 
+/**
+ * Rate Limiting:
+ *
+ * Daily	   -     Unlimited
+ *
+ * Per Minute	-    60 requests
+ *
+ * Per Second	 -   3 requests
+ * */
 class RateLimitInterceptor(
     private val maxRequestsPerSecond: Int = 3,
     private val maxRequestsPerMinute: Int = 60

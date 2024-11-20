@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.swirl.anime_hub.data.local.AnimeDao
 import com.swirl.anime_hub.data.model.Anime
+import com.swirl.anime_hub.data.model.AnimeDetails
 import com.swirl.anime_hub.data.remote.JikanApiService
 import com.swirl.anime_hub.data.response.ErrorResponse
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +29,23 @@ class AnimeRepository @Inject constructor(
             }
         } catch (e: Exception) {
             Log.e("Error: ", e.message ?: "Unknown error")
+        }
+    }
+
+    suspend fun fetchAnimeDetails(animeId: Int): AnimeDetails? {
+        return try {
+            val response = apiService.fetchAnimeDetails(animeId)
+            if (response.isSuccessful && response.body() != null) {
+                val data = response.body()!!.data
+                data.toAnimeDetails()
+            } else {
+                val errorResponse = parseErrorResponse(response)
+                Log.e("Error:", errorResponse.message)
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("Error: ", e.message ?: "Unknown error")
+            null
         }
     }
 

@@ -1,9 +1,11 @@
 package com.swirl.anime_hub.data.remote
 
+import com.swirl.anime_hub.data.response.AnimeDetailsResponse
 import com.swirl.anime_hub.data.response.AnimeResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface JikanApiService {
@@ -14,4 +16,6 @@ interface JikanApiService {
         @Header("If-None-Match") etag: String? = null
     ): Response<AnimeResponse>
 
+    @GET("anime/{id}")
+    suspend fun fetchAnimeDetails(@Path("id") animeId: Int): Response<AnimeDetailsResponse>
 }
