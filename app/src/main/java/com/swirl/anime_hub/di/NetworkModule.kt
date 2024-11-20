@@ -1,18 +1,23 @@
 package com.swirl.anime_hub.di
 
 import android.app.Application
+import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import com.swirl.anime_hub.data.remote.JikanApiService
+import com.swirl.anime_hub.utils.NetworkUtils
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.Cache
+import okhttp3.CacheControl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.security.cert.X509Certificate
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
@@ -28,9 +33,9 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
-        val loggingInterceptor = HttpLoggingInterceptor()
-        loggingInterceptor.level = HttpLoggingInterceptor.Level.HEADERS
-        return loggingInterceptor
+        return HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.HEADERS
+        }
     }
 
     /**
@@ -46,6 +51,7 @@ object NetworkModule {
      * Provides an Interceptor to add custom headers to requests.
      */
     @Provides
+    @CustomInterceptorQualifier
     @Singleton
     fun provideCustomInterceptor(): Interceptor {
         return Interceptor { chain ->
@@ -54,6 +60,47 @@ object NetworkModule {
                 .header("Accept", "application/json")
                 .build()
             chain.proceed(newRequest)
+        }
+    }
+
+    /**
+     * Provides a CacheControlInterceptor to handle caching for network requests.
+     */
+    @Provides
+    @CacheControlInterceptorQualifier
+    @Singleton
+    fun provideCacheControlInterceptor(application: Application): Interceptor {
+        return Interceptor { chain ->
+            val request = chain.request()
+
+            val cacheControl = if (NetworkUtils.isNetworkAvailable(application)) {
+                CacheControl.Builder()
+                    .maxAge(5, TimeUnit.MINUTES)  // Cache for 5 minutes when online
+                    .build()
+            } else {
+                CacheControl.FORCE_CACHE  // Force cache if offline
+            }
+
+            val newRequest = request.newBuilder()
+                .cacheControl(cacheControl)
+                .build()
+
+            val response = chain.proceed(newRequest)
+
+            // Log cache hits and misses
+            if (response.cacheResponse != null) {
+                Log.d("CacheInterceptor", "Cache hit: ${response.request.url}")
+            } else {
+                Log.d("CacheInterceptor", "Cache miss: ${response.request.url}")
+            }
+
+            if (!NetworkUtils.isNetworkAvailable(application)) {
+                response.newBuilder()
+                    .header("Cache-Control", "public, only-if-cached, max-stale=86400") // 1 day cache
+                    .build()
+            } else {
+                response
+            }
         }
     }
 
@@ -68,7 +115,9 @@ object NetworkModule {
     fun provideOkHttpClient(
         loggingInterceptor: HttpLoggingInterceptor,
         rateLimitInterceptor: RateLimitInterceptor,
-        customInterceptor: Interceptor
+        @CacheControlInterceptorQualifier cacheControlInterceptor: Interceptor,
+        @CustomInterceptorQualifier customInterceptor: Interceptor,
+        cache: Cache
     ): OkHttpClient {
         // TrustManager for handling SSL certificate issues (only for development use)
         val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
@@ -87,6 +136,8 @@ object NetworkModule {
             .addInterceptor(loggingInterceptor)
             .addInterceptor(customInterceptor)
             .addInterceptor(rateLimitInterceptor)
+            .addInterceptor(cacheControlInterceptor)
+            .cache(cache)
             .build()
     }
 
@@ -98,12 +149,16 @@ object NetworkModule {
     fun provideOkHttpClient(
         loggingInterceptor: HttpLoggingInterceptor,
         rateLimitInterceptor: RateLimitInterceptor,
-        customInterceptor: Interceptor
+        customInterceptor: Interceptor,
+        cacheControlInterceptor: Interceptor,
+        cache: Cache
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)  // Log requests and responses
             .addInterceptor(customInterceptor)
             .addInterceptor(rateLimitInterceptor)
+            .addInterceptor(cacheControlInterceptor)
+            .cache(cache)
             .build()
     }*/
 
@@ -122,11 +177,11 @@ object NetworkModule {
      */
     @Provides
     @Singleton
-    fun provideRetrofitWithCache(okHttpClient: OkHttpClient, cache: Cache): Retrofit {
+    fun provideRetrofitWithCache(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://api.jikan.moe/v4/")
             .addConverterFactory(GsonConverterFactory.create())
-            .client(okHttpClient.newBuilder().cache(cache).build()) // Add cache to OkHttpClient
+            .client(okHttpClient)
             .build()
     }
 
