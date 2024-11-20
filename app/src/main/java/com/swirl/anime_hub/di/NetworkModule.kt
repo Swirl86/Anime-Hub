@@ -2,7 +2,6 @@ package com.swirl.anime_hub.di
 
 import android.app.Application
 import android.util.Log
-import androidx.compose.ui.platform.LocalContext
 import com.swirl.anime_hub.data.remote.JikanApiService
 import com.swirl.anime_hub.utils.NetworkUtils
 import dagger.Module

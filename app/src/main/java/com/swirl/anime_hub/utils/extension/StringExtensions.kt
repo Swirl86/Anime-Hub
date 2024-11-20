@@ -1,4 +1,4 @@
-package com.swirl.anime_hub.utils
+package com.swirl.anime_hub.utils.extension
 
 import android.util.Log
 import java.time.LocalDate
