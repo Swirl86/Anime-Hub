@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AnimeHub"
+rootProject.name = "Anime-Hub"
 include(":app")
  
