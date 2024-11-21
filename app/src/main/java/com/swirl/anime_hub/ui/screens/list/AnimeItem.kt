@@ -75,7 +75,7 @@ fun AnimeItem(
             Image(
                 painter = rememberAsyncImagePainter(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(anime.imageUrl)
+                        .data(anime.images.jpg.imageUrl)
                         .crossfade(true)
                         .build()
                 ),

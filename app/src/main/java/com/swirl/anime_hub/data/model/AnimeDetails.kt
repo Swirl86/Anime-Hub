@@ -16,25 +16,7 @@ data class AnimeDetails(
     val endDate: String?,
     val background: String?,
     val genres: List<Genre>?
-) {
-    fun toAnimeDetails(): AnimeDetails {
-        return AnimeDetails(
-            malId = malId,
-            title = title,
-            images = images,
-            synopsis = synopsis,
-            episodes = episodes,
-            score = score,
-            aired = aired,
-            url = url,
-            trailer = trailer,
-            startDate = aired?.from,
-            endDate = aired?.to,
-            background = background,
-            genres = genres?.map { Genre(it.name) }
-        )
-    }
-}
+)
 
 data class Genre(
     val name: String

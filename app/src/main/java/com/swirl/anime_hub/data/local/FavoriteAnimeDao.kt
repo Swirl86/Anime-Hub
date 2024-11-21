@@ -4,15 +4,15 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.swirl.anime_hub.data.model.Anime
+import com.swirl.anime_hub.data.model.FavoriteAnime
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface AnimeDao {
+interface FavoriteAnimeDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(animeList: List<Anime>)
+    suspend fun insert(favoriteAnime: List<FavoriteAnime>)
 
-    @Query("SELECT * FROM anime_table")
-    fun getAllAnime(): Flow<List<Anime>>
+    @Query("SELECT * FROM favorite_anime_table")
+    fun getAllFavoriteAnime(): Flow<List<FavoriteAnime>>
 
 }

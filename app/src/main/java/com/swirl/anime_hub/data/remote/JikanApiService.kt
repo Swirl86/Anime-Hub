@@ -1,7 +1,7 @@
 package com.swirl.anime_hub.data.remote
 
 import com.swirl.anime_hub.data.response.AnimeDetailsResponse
-import com.swirl.anime_hub.data.response.AnimeResponse
+import com.swirl.anime_hub.data.response.AnimeListResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -10,11 +10,19 @@ import retrofit2.http.Query
 
 interface JikanApiService {
 
+    /**
+     * All requests return a ETag header which is an MD5 hash of the response.
+     * You can use this hash to verify if there's new or updated content by suppliying it as the
+     * value for the If-None-Match in your next request header.
+     *
+     * For more information, visit the Jikan API documentation:
+     * https://docs.api.jikan.moe/#section/Information/Caching
+     */
     @GET("anime")
-    suspend fun fetchAnimeListWithHeaders(
-        @Query("page") page: Int = 1,
+    suspend fun fetchAnimeList(
+        @Query("page") page: Int,
         @Header("If-None-Match") etag: String? = null
-    ): Response<AnimeResponse>
+    ): Response<AnimeListResponse>
 
     @GET("anime/{id}")
     suspend fun fetchAnimeDetails(@Path("id") animeId: Int): Response<AnimeDetailsResponse>

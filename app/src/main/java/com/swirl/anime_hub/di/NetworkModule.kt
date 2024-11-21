@@ -118,6 +118,8 @@ object NetworkModule {
         @CustomInterceptorQualifier customInterceptor: Interceptor,
         cache: Cache
     ): OkHttpClient {
+        //cache.evictAll() // Clear cache för testing
+
         // TrustManager for handling SSL certificate issues (only for development use)
         val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
             override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}

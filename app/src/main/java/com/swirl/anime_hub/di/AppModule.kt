@@ -2,8 +2,8 @@ package com.swirl.anime_hub.di
 
 import android.app.Application
 import androidx.room.Room
-import com.swirl.anime_hub.data.local.AnimeDao
 import com.swirl.anime_hub.data.local.AnimeDatabase
+import com.swirl.anime_hub.data.local.FavoriteAnimeDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,10 +26,10 @@ object AppModule {
     }
 
     /**
-     * Provides the AnimeDao for database access
+     * Provides the FavoriteAnimeDao for database access
      */
     @Provides
-    fun provideAnimeDao(database: AnimeDatabase): AnimeDao {
-        return database.animeDao()
+    fun provideAnimeDao(database: AnimeDatabase): FavoriteAnimeDao {
+        return database.favoriteAnimeDao()
     }
 }

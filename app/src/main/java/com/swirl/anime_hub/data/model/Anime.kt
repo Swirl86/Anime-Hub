@@ -1,14 +1,12 @@
 package com.swirl.anime_hub.data.model
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import com.google.gson.annotations.SerializedName
 
-@Entity(tableName = "anime_table")
 data class Anime(
-    @PrimaryKey val malId: Int,
+    @SerializedName("mal_id") val malId: Int,
     val title: String,
     val synopsis: String?,
-    val imageUrl: String,
+    @SerializedName("images") val images: AnimeImages,
     val episodes: Int?,
     val score: Double?,
     val airing: Boolean,

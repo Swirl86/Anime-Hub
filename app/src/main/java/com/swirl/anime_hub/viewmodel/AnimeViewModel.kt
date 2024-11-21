@@ -17,6 +17,10 @@ import javax.inject.Inject
 class AnimeViewModel @Inject constructor(
     private val repository: AnimeRepository
 ) : ViewModel() {
+    private var currentPage = 1
+
+    private var _hasNextPage = MutableStateFlow(true)
+    val hasNextPage: StateFlow<Boolean> = _hasNextPage
 
     private val _animeList = MutableStateFlow<List<Anime>>(emptyList())
     val animeList: StateFlow<List<Anime>> = _animeList
@@ -24,17 +28,30 @@ class AnimeViewModel @Inject constructor(
     private val _animeDetails = MutableStateFlow<AnimeDetails?>(null)
     val animeDetails: StateFlow<AnimeDetails?> get() = _animeDetails
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
     private val _errorState = MutableStateFlow<ErrorResponse?>(null)
     val errorState: StateFlow<ErrorResponse?> = _errorState
 
-    fun fetchAnimeList(page: Int = 1, etag: String? = null) {
+    fun fetchAnimeList() {
+        // Prevent multiple API calls if already loading or no more pages
+        if (_isLoading.value || !_hasNextPage.value) return
+
+        _isLoading.value = true
         viewModelScope.launch {
             try {
-                repository.fetchAndSaveAnime(page, etag)
+                val apiResponse = repository.fetchAnimeList(currentPage)
 
-                repository.animeList.collect { list ->
-                    _animeList.value = list
-                }
+                val newAnimeList = apiResponse.data.map { it }
+                val currentList = _animeList.value.toMutableList()
+                currentList.addAll(newAnimeList)
+                _animeList.value = currentList
+
+                // Update page number and whether there are more pages
+                currentPage = apiResponse.pagination.currentPage + 1
+                _hasNextPage.value = apiResponse.pagination.hasNextPage
+
             } catch (e: Exception) {
                 _errorState.value = ErrorResponse(
                     status = 500,
@@ -43,7 +60,8 @@ class AnimeViewModel @Inject constructor(
                     error = e.message ?: "Unknown error",
                     reportUrl = ""
                 )
-                Log.e("Error: ", e.message ?: "Unknown error")
+            } finally {
+                _isLoading.value = false
             }
         }
     }
