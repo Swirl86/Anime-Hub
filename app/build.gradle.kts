@@ -136,4 +136,7 @@ dependencies {
 
     // Core library desugaring
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    // Reflection -  inspect, modify, and create new objects at runtime
+    implementation(libs.kotlin.reflect)
 }

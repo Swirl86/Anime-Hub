@@ -1,7 +1,9 @@
 package com.swirl.anime_hub.ui.navigation
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -10,31 +12,23 @@ import androidx.navigation.navArgument
 import com.swirl.anime_hub.ui.screens.details.AnimeDetailScreen
 import com.swirl.anime_hub.ui.screens.list.AnimeListScreen
 
-sealed class Screen(val route: String) {
-    data object AnimeList : Screen("anime_list")
-    data object AnimeDetail : Screen("anime_detail/{animeId}") {
-        fun createRoute(animeId: Int) = "anime_detail/$animeId"
-    }
-}
-
 @Composable
-fun AnimeNavGraph(navController: NavHostController) {
+fun NavGraph(navController: NavHostController, paddingValues: PaddingValues) {
+
     NavHost(
         navController = navController,
-        startDestination = Screen.AnimeList.route
+        startDestination = Screens.AnimeList.route,
+        modifier = Modifier.padding(paddingValues)
     ) {
-        composable(Screen.AnimeList.route) {
+        composable(Screens.AnimeList.route) {
             AnimeListScreen(
-                viewModel = hiltViewModel(),
                 onAnimeSelected = { animeId ->
-                    // Navigate to the AnimeDetail screen when an anime item is clicked
-                    navController.navigate(Screen.AnimeDetail.createRoute(animeId))
+                    NavigationActions.navigateToAnimeDetail(navController, animeId)
                 }
             )
         }
-
         composable(
-            route = Screen.AnimeDetail.route,
+            route = Screens.AnimeDetail.route,
             arguments = listOf(navArgument("animeId") { type = NavType.IntType })
         ) { backStackEntry ->
             val animeId = backStackEntry.arguments?.getInt("animeId") ?: return@composable
@@ -42,4 +36,3 @@ fun AnimeNavGraph(navController: NavHostController) {
         }
     }
 }
-
