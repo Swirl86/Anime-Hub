@@ -3,6 +3,7 @@ package com.swirl.anime_hub.di
 import android.app.Application
 import android.util.Log
 import com.swirl.anime_hub.data.remote.JikanApiService
+import com.swirl.anime_hub.utils.Constants.BASE_URL
 import com.swirl.anime_hub.utils.NetworkUtils
 import dagger.Module
 import dagger.Provides
@@ -180,7 +181,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofitWithCache(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://api.jikan.moe/v4/")
+            .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()

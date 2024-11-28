@@ -1,4 +1,4 @@
-package com.swirl.anime_hub.data.response
+package com.swirl.anime_hub.data.remote.response
 
 import com.google.gson.annotations.SerializedName
 import com.swirl.anime_hub.data.model.Anime
