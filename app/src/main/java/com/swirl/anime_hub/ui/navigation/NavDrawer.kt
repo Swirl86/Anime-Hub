@@ -12,9 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -80,11 +77,11 @@ fun NavDrawer(
             modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth()
         ) {
             NavigationDrawerItem(
-                label = { Text(Screens.AnimeList.title) },
+                label = { Text("Home") },
                 selected = route == Screens.AnimeList.route,
                 onClick = {
                     closeDrawer()
-                    NavigationActions.navigateToAnimeList(navController)
+                    NavigationActions.navigateToAnimeList(navController, Screens.AnimeList)
                 },
                 icon = {
                     Icon(imageVector = Screens.AnimeList.icon, contentDescription = "Home Icon")
@@ -94,23 +91,20 @@ fun NavDrawer(
                     selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
-            /* TODO implement */
             NavigationDrawerItem(
-                label = { Text("Top Anime") },
-                selected = false,
-                onClick = { /* Handle Top Anime navigation */ },
+                label = { Text(Screens.TopAnime.title) },
+                selected = route == Screens.TopAnime.route,
+                onClick = {
+                    closeDrawer()
+                    NavigationActions.navigateToAnimeList(navController, Screens.TopAnime)
+                },
                 icon = {
-                    Icon(imageVector = Icons.Default.Star, contentDescription = "Star Icon")
-                }
-
-            )
-            NavigationDrawerItem(
-                label = { Text("Manga") },
-                selected = false,
-                onClick = { /* Handle Manga navigation */ },
-                icon = {
-                    Icon(imageVector = Icons.Default.Book, contentDescription = "Book Icon")
-                }
+                    Icon(imageVector = Screens.TopAnime.icon, contentDescription = "Star Icon")
+                },
+                colors = NavigationDrawerItemDefaults.colors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
     }

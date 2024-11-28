@@ -1,14 +1,13 @@
 package com.swirl.anime_hub.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swirl.anime_hub.data.model.Anime
 import com.swirl.anime_hub.data.model.AnimeDetails
-import com.swirl.anime_hub.data.repository.AnimeRepository
+import com.swirl.anime_hub.data.model.FetchType
 import com.swirl.anime_hub.data.remote.response.ErrorResponse
+import com.swirl.anime_hub.data.repository.AnimeRepository
 import com.swirl.anime_hub.utils.Resource
-import com.swirl.anime_hub.utils.extension.getStatusMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +18,10 @@ import javax.inject.Inject
 class AnimeViewModel @Inject constructor(
     private val repository: AnimeRepository
 ) : ViewModel() {
-    private var currentPage = 1
+    private val currentPages = mutableMapOf<FetchType, Int>(
+        FetchType.AnimeList to 1,
+        FetchType.TopAnime to 1
+    )
 
     private val _hasNextPage = MutableStateFlow(true)
     val hasNextPage: StateFlow<Boolean> = _hasNextPage
@@ -47,14 +49,20 @@ class AnimeViewModel @Inject constructor(
         )
     }
 
-    fun fetchAnimeList() {
+    fun fetchAnimeList(fetchType: FetchType) {
         // Prevent multiple API calls if already loading or no more pages
         if (_isLoading.value || !_hasNextPage.value) return
+
+        val page = currentPages.getOrDefault(fetchType, 1)
+
+        if (_animeList.value.isEmpty()) {
+            currentPages[fetchType] = 1
+        }
 
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val result = repository.fetchAnimeList(currentPage)
+                val result = repository.fetchAnimeList(page, fetchType)
                 when (result) {
                     is Resource.Success -> {
                         val newAnimeList = result.data?.data ?: emptyList()
@@ -63,7 +71,7 @@ class AnimeViewModel @Inject constructor(
                         _animeList.value = currentList
 
                         result.data?.pagination?.let { pagination ->
-                            currentPage = pagination.currentPage + 1
+                            currentPages[fetchType] = pagination.currentPage + 1
                             _hasNextPage.value = pagination.hasNextPage
                         }
                     }

@@ -30,6 +30,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.swirl.anime_hub.ui.components.InfoRow
 import com.swirl.anime_hub.ui.screens.common.LoadingScreen
+import com.swirl.anime_hub.utils.extension.isNullOrEmptyString
 import com.swirl.anime_hub.utils.extension.toFormattedDate
 import com.swirl.anime_hub.viewmodel.AnimeViewModel
 
@@ -95,16 +96,16 @@ fun AnimeDetailScreen(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            details.startDate?.let {
+            details.startDate?.isNullOrEmptyString()?.let {
                 InfoRow(label = "Start Date:", value = it.toFormattedDate())
             }
-            details.endDate?.let {
+            details.endDate?.isNullOrEmptyString()?.let {
                 InfoRow(label = "End Date:", value = it.toFormattedDate())
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            details.trailer?.url?.let {
+            details.trailer?.url?.isNullOrEmptyString()?.let {
                 Text(
                     text = "Watch Trailer",
                     color = Color.Blue,
@@ -135,7 +136,7 @@ fun AnimeDetailScreen(
                 )
             }
 
-            details.background?.let {
+            details.background?.isNullOrEmptyString()?.let {
                 Text(
                     text = "Background:",
                     style = MaterialTheme.typography.titleMedium,

@@ -24,6 +24,12 @@ interface JikanApiService {
         @Header("If-None-Match") etag: String? = null
     ): Response<AnimeListResponse>
 
+    @GET("top/anime")
+    suspend fun fetchTopAnime(
+        @Query("page") page: Int,
+        @Header("If-None-Match") etag: String? = null
+    ): Response<AnimeListResponse>
+
     @GET("anime/{id}")
     suspend fun fetchAnimeDetails(@Path("id") animeId: Int): Response<AnimeDetailsResponse>
 }

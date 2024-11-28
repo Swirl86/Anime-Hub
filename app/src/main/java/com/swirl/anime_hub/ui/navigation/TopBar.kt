@@ -20,7 +20,11 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavHostController, showBackArrow: Boolean, drawerState: DrawerState) {
+fun TopBar(
+    navController: NavHostController,
+    showBackArrow: Boolean,
+    drawerState: DrawerState
+) {
     val scope = rememberCoroutineScope()
     TopAppBar(
         title = {

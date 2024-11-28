@@ -18,3 +18,7 @@ fun String?.toFormattedDate(): String {
         "N/A"
     }
 }
+
+fun String?.isNullOrEmptyString(): String? {
+    return if (this.isNullOrEmpty()) null else this
+}

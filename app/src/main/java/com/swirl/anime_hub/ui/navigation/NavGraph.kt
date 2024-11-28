@@ -9,12 +9,15 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.swirl.anime_hub.data.model.FetchType
 import com.swirl.anime_hub.ui.screens.details.AnimeDetailScreen
 import com.swirl.anime_hub.ui.screens.list.AnimeListScreen
 
 @Composable
-fun NavGraph(navController: NavHostController, paddingValues: PaddingValues) {
-
+fun NavGraph(
+    navController: NavHostController,
+    paddingValues: PaddingValues
+) {
     NavHost(
         navController = navController,
         startDestination = Screens.AnimeList.route,
@@ -22,6 +25,16 @@ fun NavGraph(navController: NavHostController, paddingValues: PaddingValues) {
     ) {
         composable(Screens.AnimeList.route) {
             AnimeListScreen(
+                fetchType = FetchType.AnimeList,
+                onAnimeSelected = { animeId ->
+                    NavigationActions.navigateToAnimeDetail(navController, animeId)
+                }
+            )
+        }
+
+        composable(Screens.TopAnime.route) {
+            AnimeListScreen(
+                fetchType = FetchType.TopAnime,
                 onAnimeSelected = { animeId ->
                     NavigationActions.navigateToAnimeDetail(navController, animeId)
                 }

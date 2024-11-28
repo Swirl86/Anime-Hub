@@ -12,16 +12,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.swirl.anime_hub.data.model.FetchType
 import com.swirl.anime_hub.ui.screens.common.LoadingScreen
 import com.swirl.anime_hub.viewmodel.AnimeViewModel
 
 @Composable
 fun AnimeListScreen(
     viewModel: AnimeViewModel = hiltViewModel(),
+    fetchType: FetchType,
     onAnimeSelected: (Int) -> Unit
 ) {
     val animeList by viewModel.animeList.collectAsState()
@@ -30,19 +33,21 @@ fun AnimeListScreen(
     val hasNextPage by viewModel.hasNextPage.collectAsState()
     val listState = rememberLazyListState()
 
-    // Fetch anime list on initial load
-    LaunchedEffect(Unit) {
-        viewModel.fetchAnimeList()
+    // Fetch anime list on initial load or when fetchType changes
+    LaunchedEffect(fetchType) {
+        viewModel.fetchAnimeList(fetchType)
     }
 
-    LaunchedEffect(listState.firstVisibleItemIndex) {
-        // Check if we're at the bottom of the list
-        val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
-
-        if (lastVisibleItem != null && lastVisibleItem.index == animeList.size - 1 && hasNextPage) {
-            // Load next page
-            viewModel.fetchAnimeList()
-        }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .collect { newIndex ->
+                val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+                // Check if we're at the bottom of the list
+                if (lastVisibleItem != null && lastVisibleItem.index == animeList.size - 1 && hasNextPage) {
+                    // Trigger loading the next page
+                    viewModel.fetchAnimeList(fetchType)
+                }
+            }
     }
 
     when {

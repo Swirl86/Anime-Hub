@@ -10,9 +10,14 @@ object NavigationActions {
         navController.navigate(Screens.AnimeDetail.createRoute(animeId))
     }
 
-    fun navigateToAnimeList(navController: NavController) {
-        navController.navigate(Screens.AnimeList.route) {
-            popUpTo(Screens.AnimeList.route) { inclusive = true }
+    fun navigateToAnimeList(navController: NavController, screen: Screens) {
+        if (screen == Screens.AnimeList) {
+            navController.navigate(screen.route) {
+                popUpTo(Screens.AnimeList.route) { inclusive = false }
+                launchSingleTop = true
+            }
+        } else {
+            navController.navigate(screen.route)
         }
     }
 }

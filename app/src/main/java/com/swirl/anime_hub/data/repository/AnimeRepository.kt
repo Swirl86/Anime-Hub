@@ -1,15 +1,13 @@
 package com.swirl.anime_hub.data.repository
 
 import android.util.Log
-import com.google.gson.Gson
 import com.swirl.anime_hub.data.model.AnimeDetails
+import com.swirl.anime_hub.data.model.FetchType
+import com.swirl.anime_hub.data.model.Pagination
 import com.swirl.anime_hub.data.remote.JikanApiService
 import com.swirl.anime_hub.data.remote.response.AnimeListResponse
-import com.swirl.anime_hub.data.remote.response.ErrorResponse
-import com.swirl.anime_hub.data.remote.response.Pagination
 import com.swirl.anime_hub.utils.Resource
 import com.swirl.anime_hub.utils.parseErrorResponse
-import retrofit2.Response
 import javax.inject.Inject
 
 class AnimeRepository @Inject constructor(
@@ -17,9 +15,17 @@ class AnimeRepository @Inject constructor(
 ) {
     private var currentEtag: String? = null
 
-    suspend fun fetchAnimeList(page: Int): Resource<AnimeListResponse> {
+    suspend fun fetchAnimeList(page: Int, fetchType: FetchType = FetchType.AnimeList): Resource<AnimeListResponse> {
         return try {
-            val response = apiService.fetchAnimeList(page, currentEtag)
+            val response = when (fetchType) {
+                FetchType.AnimeList -> {
+                    apiService.fetchAnimeList(page, currentEtag)
+                }
+                FetchType.TopAnime -> {
+                    apiService.fetchTopAnime(page, currentEtag)
+                }
+            }
+
             if (response.isSuccessful) {
                 response.body()?.let { apiResponse ->
                     currentEtag = response.headers()["ETag"]
@@ -48,9 +54,9 @@ class AnimeRepository @Inject constructor(
                     Resource.Success(details)
                 } ?: Resource.Error("API response body is null", code = response.code())
             } else {
-                val errorResponse = parseErrorResponse(response)
+                val errorResponse = parseErrorResponse(response, "Failed to fetch anime details")
                 Resource.Error(
-                    message = errorResponse.message ?: "Failed to fetch anime details",
+                    message = errorResponse.message,
                     code = response.code()
                 )
             }
