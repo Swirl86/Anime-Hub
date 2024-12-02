@@ -9,6 +9,6 @@ fun NavDestination?.getScreenTitle(): String {
             .mapNotNull { it.objectInstance }
             .find { screen ->
                 myRoute.startsWith(screen.route.substringBefore("{"))
-            }?.title ?: "Anime Hub ++"
+            }?.title ?: "Anime Hub"
     } ?: "Anime Hub"
 }

@@ -76,36 +76,36 @@ fun NavDrawer(
         Column(
             modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth()
         ) {
-            NavigationDrawerItem(
-                label = { Text("Home") },
-                selected = route == Screens.AnimeList.route,
-                onClick = {
-                    closeDrawer()
-                    NavigationActions.navigateToAnimeList(navController, Screens.AnimeList)
-                },
-                icon = {
-                    Icon(imageVector = Screens.AnimeList.icon, contentDescription = "Home Icon")
-                },
-                colors = NavigationDrawerItemDefaults.colors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+            val screens = listOf(
+                Screens.AnimeList,
+                Screens.TopAnime,
+                // Add more screens here
             )
-            NavigationDrawerItem(
-                label = { Text(Screens.TopAnime.title) },
-                selected = route == Screens.TopAnime.route,
-                onClick = {
-                    closeDrawer()
-                    NavigationActions.navigateToAnimeList(navController, Screens.TopAnime)
-                },
-                icon = {
-                    Icon(imageVector = Screens.TopAnime.icon, contentDescription = "Star Icon")
-                },
-                colors = NavigationDrawerItemDefaults.colors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+
+            screens.forEach { screen ->
+                NavigationDrawerItem(
+                    label = {
+                        Text(
+                            when (screen) {
+                                Screens.AnimeList -> "Home"
+                                else -> screen.title
+                            }
+                        )
+                    },
+                    selected = route == screen.route,
+                    onClick = {
+                        closeDrawer()
+                        NavigationActions.navigateToAnimeList(navController, screen)
+                    },
+                    icon = {
+                        Icon(imageVector = screen.icon, contentDescription = "${screen.title} Icon")
+                    },
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 )
-            )
+            }
         }
     }
 }
