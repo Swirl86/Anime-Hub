@@ -1,10 +1,12 @@
 package com.swirl.anime_hub.ui.screens.favorite
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,7 +24,7 @@ fun FavoriteAnimeScreen(
     onAnimeClick: (Int) -> Unit
 ) {
     val favoriteAnimeList by viewModel.favoriteAnimeList.collectAsState()
-    val listState = rememberLazyListState()
+    val gridState = rememberLazyGridState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorState by viewModel.errorState.collectAsState()
 
@@ -37,12 +39,14 @@ fun FavoriteAnimeScreen(
     if (favoriteAnimeList.isEmpty()) {
         EmptyFavorite()
     } else {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize()
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 150.dp),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(8.dp),
+            state = gridState
         ) {
             items(favoriteAnimeList) { anime ->
-                FavoriteAnimeItem(
+                FavoriteAnimeCard(
                     anime = anime,
                     onClick = { onAnimeClick(anime.malId) },
                     onRemove = { viewModel.removeFavorite(anime) }
