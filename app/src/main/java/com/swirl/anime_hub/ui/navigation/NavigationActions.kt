@@ -20,4 +20,25 @@ object NavigationActions {
             navController.navigate(screen.route)
         }
     }
+
+    fun navigateToFavorites(navController: NavController) {
+        navController.navigate(Screens.FavoriteAnime.route) {
+            launchSingleTop = true
+        }
+    }
+
+    /**
+     * Navigate to another screen based on the provided route and arguments.
+     */
+    /*fun navigateToScreen(navController: NavController, screen: Screens, vararg args: Pair<String, String>) {
+        val route = if (args.isNotEmpty()) {
+            screen.createRoute(*args)
+        } else {
+            screen.route
+        }
+
+        navController.navigate(route) {
+            launchSingleTop = true
+        }
+    }*/
 }

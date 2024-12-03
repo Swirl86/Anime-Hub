@@ -28,6 +28,7 @@ fun AnimeListScreen(
     onAnimeSelected: (Int) -> Unit
 ) {
     val animeList by viewModel.animeList.collectAsState()
+    val favoriteAnimeList by viewModel.favoriteAnimeList.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorState by viewModel.errorState.collectAsState()
     val hasNextPage by viewModel.hasNextPage.collectAsState()
@@ -37,7 +38,6 @@ fun AnimeListScreen(
     LaunchedEffect(fetchType) {
         viewModel.fetchAnimeList(fetchType)
     }
-
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemIndex }
             .collect { newIndex ->
@@ -58,9 +58,13 @@ fun AnimeListScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(animeList) { anime ->
+                    val isFavorite = favoriteAnimeList.any { it.malId == anime.malId }
                     AnimeItem(
                         anime = anime,
-                        onClick = { onAnimeSelected(anime.malId) }
+                        isFavorite = isFavorite,
+                        onClick = { onAnimeSelected(anime.malId) },
+                        onAddToFavorite = { viewModel.addToFavorites(it.malId) },
+                        onRemoveFromFavorite = { viewModel.removeFromFavorites(it.malId) }
                     )
                 }
 

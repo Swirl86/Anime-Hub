@@ -41,11 +41,15 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.swirl.anime_hub.data.model.Anime
 import com.swirl.anime_hub.ui.components.InfoRow
+import com.swirl.anime_hub.ui.screens.common.FavoriteIconButton
 
 @Composable
 fun AnimeItem(
     anime: Anime,
-    onClick: (Int) -> Unit
+    isFavorite: Boolean,
+    onClick: (Int) -> Unit,
+    onAddToFavorite: (Anime) -> Unit,
+    onRemoveFromFavorite: (Anime) -> Unit
 ) {
 
     val context = LocalContext.current
@@ -67,10 +71,25 @@ fun AnimeItem(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text(
-                text = anime.title,
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    modifier = Modifier.weight(5f),
+                    text = anime.title,
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                FavoriteIconButton(
+                    modifier = Modifier.weight(1f),
+                    isFavorite = isFavorite,
+                    onClick = { if (isFavorite) onRemoveFromFavorite(anime) else onAddToFavorite(anime) }
+                )
+            }
 
             Image(
                 painter = rememberAsyncImagePainter(

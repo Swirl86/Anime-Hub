@@ -12,11 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -76,36 +75,37 @@ fun NavDrawer(
         Column(
             modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth()
         ) {
-            val screens = listOf(
-                Screens.AnimeList,
-                Screens.TopAnime,
-                // Add more screens here
+            CustomNavigationDrawerItem(
+                label = { Text(Screens.FavoriteAnime.title) },
+                selected = route == Screens.FavoriteAnime.route,
+                onClick = {
+                    closeDrawer()
+                    NavigationActions.navigateToFavorites(navController)
+                },
+                icon = { Icon(imageVector = Screens.FavoriteAnime.icon, contentDescription = "Favorite Icon") }
             )
 
-            screens.forEach { screen ->
-                NavigationDrawerItem(
-                    label = {
-                        Text(
-                            when (screen) {
-                                Screens.AnimeList -> "Home"
-                                else -> screen.title
-                            }
-                        )
-                    },
-                    selected = route == screen.route,
-                    onClick = {
-                        closeDrawer()
-                        NavigationActions.navigateToAnimeList(navController, screen)
-                    },
-                    icon = {
-                        Icon(imageVector = screen.icon, contentDescription = "${screen.title} Icon")
-                    },
-                    colors = NavigationDrawerItemDefaults.colors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                )
-            }
+            HorizontalDivider(modifier = Modifier.padding(bottom = 16.dp))
+
+            CustomNavigationDrawerItem(
+                label = { Text("Home") },
+                selected = route == Screens.AnimeList.route,
+                onClick = {
+                    closeDrawer()
+                    NavigationActions.navigateToAnimeList(navController, Screens.AnimeList)
+                },
+                icon = { Icon(imageVector = Screens.AnimeList.icon, contentDescription = "Home Icon") }
+            )
+
+            CustomNavigationDrawerItem(
+                label = { Text(Screens.TopAnime.title) },
+                selected = route == Screens.TopAnime.route,
+                onClick = {
+                    closeDrawer()
+                    NavigationActions.navigateToAnimeList(navController, Screens.TopAnime)
+                },
+                icon = { Icon(imageVector = Screens.TopAnime.icon, contentDescription = "Star Icon") }
+            )
         }
     }
 }
