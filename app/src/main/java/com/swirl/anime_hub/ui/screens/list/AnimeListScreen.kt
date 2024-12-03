@@ -27,7 +27,7 @@ fun AnimeListScreen(
     fetchType: FetchType,
     onAnimeSelected: (Int) -> Unit
 ) {
-    val animeList by viewModel.animeList.collectAsState()
+    val animeList by viewModel.getAnimeList(fetchType).collectAsState()
     val favoriteAnimeList by viewModel.favoriteAnimeList.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorState by viewModel.errorState.collectAsState()

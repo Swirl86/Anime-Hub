@@ -22,31 +22,30 @@ class AnimeViewModel @Inject constructor(
     private val repository: AnimeRepository,
     private val favoriteAnimeRepository: FavoriteAnimeRepository
 ) : ViewModel() {
+    private val animeData = mutableMapOf<FetchType, MutableStateFlow<List<Anime>>>(
+        FetchType.AnimeList to MutableStateFlow(emptyList()),
+        FetchType.TopAnime to MutableStateFlow(emptyList())
+    )
+
+    private val _animeDetails = MutableStateFlow<AnimeDetails?>(null)
+    val animeDetails: StateFlow<AnimeDetails?> get() = _animeDetails
+
     private val currentPages = mutableMapOf<FetchType, Int>(
         FetchType.AnimeList to 1,
         FetchType.TopAnime to 1
     )
 
-    private val _hasNextPage = MutableStateFlow(true)
-    val hasNextPage: StateFlow<Boolean> = _hasNextPage
-
-    private val _animeList = MutableStateFlow<List<Anime>>(emptyList())
-    val animeList: StateFlow<List<Anime>> = _animeList
-
-    private val _animeDetails = MutableStateFlow<AnimeDetails?>(null)
-    val animeDetails: StateFlow<AnimeDetails?> get() = _animeDetails
-
-    private val _lastFetchType = MutableStateFlow<FetchType?>(null)
+    private val hasNextPageMap = mutableMapOf<FetchType, MutableStateFlow<Boolean>>(
+        FetchType.AnimeList to MutableStateFlow(true),
+        FetchType.TopAnime to MutableStateFlow(true)
+    )
+    val hasNextPage: StateFlow<Boolean> = hasNextPageMap[FetchType.AnimeList]!!
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _errorState = MutableStateFlow<ErrorResponse?>(null)
     val errorState: StateFlow<ErrorResponse?> = _errorState
-
-    private fun <T> handleError(error: Resource.Error<T>) {
-        _errorState.value = getErrorResponse(error)
-    }
 
     private val _favoriteAnimeList = MutableStateFlow<List<FavoriteAnime>>(emptyList())
     val favoriteAnimeList: StateFlow<List<FavoriteAnime>> = _favoriteAnimeList
@@ -61,32 +60,31 @@ class AnimeViewModel @Inject constructor(
         }
     }
 
+    private fun <T> handleError(error: Resource.Error<T>) {
+        _errorState.value = getErrorResponse(error)
+    }
+
     fun fetchAnimeList(fetchType: FetchType) {
         // Prevent multiple API calls if already loading or no more pages
-        if (fetchType == _lastFetchType.value || _isLoading.value || !_hasNextPage.value) return
+        if (_isLoading.value || !hasNextPageMap[fetchType]!!.value) return
 
-        val page = currentPages.getOrDefault(fetchType, 1)
-
-        if (_animeList.value.isEmpty()) {
-            currentPages[fetchType] = 1
-        }
+        val currentPage = currentPages[fetchType] ?: 1
 
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val result = repository.fetchAnimeList(page, fetchType)
+                val result = repository.fetchAnimeList(currentPage, fetchType)
                 when (result) {
                     is Resource.Success -> {
                         val newAnimeList = result.data?.data ?: emptyList()
-                        val currentList = _animeList.value.toMutableList()
+                        val currentList = animeData[fetchType]!!.value.toMutableList()
                         currentList.addAll(newAnimeList)
-                        _animeList.value = currentList
+                        animeData[fetchType]!!.value = currentList
 
                         result.data?.pagination?.let { pagination ->
                             currentPages[fetchType] = pagination.currentPage + 1
-                            _hasNextPage.value = pagination.hasNextPage
+                            hasNextPageMap[fetchType]!!.value = pagination.hasNextPage
                         }
-                        _lastFetchType.value = fetchType
                     }
                     is Resource.Error -> handleError(result)
                 }
@@ -124,8 +122,7 @@ class AnimeViewModel @Inject constructor(
 
     fun addToFavorites(malId: Int) {
         viewModelScope.launch {
-            val anime = _animeList.value.find { it.malId == malId }
-            anime?.let {
+            malId.getAnimeById()?.let { anime ->
                 val favoriteAnime = FavoriteAnime(
                     malId = anime.malId,
                     title = anime.title,
@@ -139,8 +136,7 @@ class AnimeViewModel @Inject constructor(
 
     fun removeFromFavorites(malId: Int) {
         viewModelScope.launch {
-            val anime = _animeList.value.find { it.malId == malId }
-            anime?.let {
+            malId.getAnimeById()?.let { anime ->
                 val favoriteAnime = FavoriteAnime(
                     malId = anime.malId,
                     title = anime.title,
@@ -151,4 +147,10 @@ class AnimeViewModel @Inject constructor(
             }
         }
     }
+
+    fun Int.getAnimeById(): Anime? = animeData.values
+        .mapNotNull { it.value.find { anime -> anime.malId == this } }
+        .firstOrNull()
+
+    fun getAnimeList(fetchType: FetchType): StateFlow<List<Anime>> = animeData[fetchType] ?: MutableStateFlow(emptyList())
 }
